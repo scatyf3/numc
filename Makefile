@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -g -Wall -std=c99 -fopenmp -mavx -mfma -pthread
 LDFLAGS = -fopenmp
-CUNIT = -L/home/ff/cs61c/cunit/install/lib -I/home/ff/cs61c/cunit/install/include -lcunit
-PYTHON = -I/usr/include/python3.6 -lpython3.6m
+CUNIT = -L/usr/lib/x86_64-linux-gnu -I/usr/include/CUnit -lcunit
+PYTHON = -I/workspaces/numc/Python-3.6.15 -lpython3.6m
 
 install:
 	if [ ! -f files.txt ]; then touch files.txt; fi

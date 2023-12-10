@@ -52,7 +52,31 @@ void rand_matrix(matrix *result, unsigned int seed, double low, double high) {
  * call to allocate memory in this function fails. Return 0 upon success.
  */
 int allocate_matrix(matrix **mat, int rows, int cols) {
-    /* TODO: YOUR CODE HERE */
+    //edge case
+    if (rows <=0 ){
+        return -1;
+    }
+    if (cols <=0 ){
+        return -1;
+    }
+    //给最初的mat分配空间
+    (*mat) = (matrix*)malloc(sizeof(struct matrix));
+    if ((*mat)==NULL){
+        return -1;
+    }
+    //赋值
+    (*mat)->rows = rows;
+    (*mat)->cols = cols;
+    (*mat)->ref_cnt = 1;
+    (*mat)->parent = NULL;
+    (*mat)->data = malloc(rows*cols*sizeof(double));
+    if (((*mat)->data)==NULL){
+        return -1;
+    }
+    for(int i = 0;i< cols*rows ;i++){
+        (*mat)->data[i] = 0;
+    }
+    return 0;
 }
 
 /*
@@ -63,7 +87,7 @@ int allocate_matrix(matrix **mat, int rows, int cols) {
  * call to allocate memory in this function fails. Return 0 upon success.
  */
 int allocate_matrix_ref(matrix **mat, matrix *from, int offset, int rows, int cols) {
-    /* TODO: YOUR CODE HERE */
+    
 }
 
 /*
@@ -72,7 +96,8 @@ int allocate_matrix_ref(matrix **mat, matrix *from, int offset, int rows, int co
  * (including itself). You cannot assume that mat is not NULL.
  */
 void deallocate_matrix(matrix *mat) {
-    /* TODO: YOUR CODE HERE */
+    free(mat->data);
+    free(mat);
 }
 
 /*
@@ -80,7 +105,8 @@ void deallocate_matrix(matrix *mat) {
  * You may assume `row` and `col` are valid.
  */
 double get(matrix *mat, int row, int col) {
-    /* TODO: YOUR CODE HERE */
+    return mat->data[row*mat->cols+col];
+
 }
 
 /*
@@ -88,7 +114,7 @@ double get(matrix *mat, int row, int col) {
  * `col` are valid
  */
 void set(matrix *mat, int row, int col, double val) {
-    /* TODO: YOUR CODE HERE */
+    mat->data[row*mat->cols+col] = val;
 }
 
 /*
@@ -103,7 +129,16 @@ void fill_matrix(matrix *mat, double val) {
  * Return 0 upon success and a nonzero value upon failure.
  */
 int add_matrix(matrix *result, matrix *mat1, matrix *mat2) {
-    /* TODO: YOUR CODE HERE */
+    if(mat1->rows!=mat2->rows){
+        return -1;
+    }
+    if(mat1->cols!=mat2->cols){
+        return -1;
+    }
+    for(int idx = 0;idx<(mat1->cols*mat1->rows);idx++){
+        result->data[idx] = mat1->data[idx] + mat2->data[idx];
+    }
+    return 0;
 }
 
 /*

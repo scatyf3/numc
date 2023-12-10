@@ -8,6 +8,7 @@ int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
 
 /************* Test case functions ****************/
+
 void add_test(void) {
   matrix *result = NULL;
   matrix *mat1 = NULL;
@@ -17,14 +18,21 @@ void add_test(void) {
   CU_ASSERT_EQUAL(allocate_matrix(&mat2, 2, 2), 0);
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
+      printf("%lf\n",result->data[i*2+j]);
+    }
+  }
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 2; j++) {
       set(mat1, i, j, i * 2 + j);
       set(mat2, i, j, i * 2 + j);
+      printf("%d = %lf\n", i * 2 + j,mat1->data[i*2+j]);
     }
   }
   add_matrix(result, mat1, mat2);
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
       CU_ASSERT_EQUAL(get(result, i, j), 2 * (i * 2 + j));
+      printf("%d = %lf\n",2 * (i * 2 + j), get(result, i, j));
     }
   }
   deallocate_matrix(result);
@@ -266,7 +274,7 @@ int main (void)
         (CU_add_test(pSuite, "alloc_ref_success_test", alloc_ref_success_test) == NULL) ||
         (CU_add_test(pSuite, "dealloc_null_test", dealloc_null_test) == NULL) ||
         (CU_add_test(pSuite, "get_test", get_test) == NULL) ||
-        (CU_add_test(pSuite, "set_test", set_test) == NULL)
+        (CU_add_test(pSuite, "set_test", set_test) == NULL) 
      )
    {
       CU_cleanup_registry();

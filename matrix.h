@@ -1,4 +1,4 @@
-#include <Python.h>
+#include </workspaces/numc/Python-3.6.15/Include/Python.h>
 
 typedef struct matrix {
     int rows; // number of rows

@@ -264,3 +264,6 @@ $RECYCLE.BIN/
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
 
+# python
+Python-3.6.15/*
+
