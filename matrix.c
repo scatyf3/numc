@@ -86,8 +86,33 @@ int allocate_matrix(matrix **mat, int rows, int cols) {
  * You should return -1 if either `rows` or `cols` or both are non-positive or if any
  * call to allocate memory in this function fails. Return 0 upon success.
  */
+/*
+Usage:
+  CU_ASSERT_EQUAL(allocate_matrix_ref(&mat, from, 2, 2, 2), 0);
+  CU_ASSERT_PTR_EQUAL(mat->data, from->data + 2);
+  CU_ASSERT_PTR_EQUAL(mat->parent, from);
+  CU_ASSERT_EQUAL(mat->parent->ref_cnt, 2);
+  CU_ASSERT_EQUAL(mat->rows, 2);
+  CU_ASSERT_EQUAL(mat->cols, 2);
+*/
 int allocate_matrix_ref(matrix **mat, matrix *from, int offset, int rows, int cols) {
-    
+    if (rows <=0 ){
+        return -1;
+    }
+    if (cols <=0 ){
+        return -1;
+    }
+    (*mat) = (matrix*)malloc(sizeof(struct matrix));
+    if ((*mat)==NULL){
+        return -1;
+    }
+    (*mat)->rows = rows;
+    (*mat)->cols = cols;
+    (*mat)->ref_cnt = 1;
+    (*mat)->parent = from;
+    from->ref_cnt +=1;
+    (*mat)->data = from->data + offset;
+    return 0;
 }
 
 /*
@@ -135,6 +160,12 @@ int add_matrix(matrix *result, matrix *mat1, matrix *mat2) {
     if(mat1->cols!=mat2->cols){
         return -1;
     }
+    if(mat1->rows!=result->rows){
+        return -1;
+    }
+    if(mat1->cols!=result->cols){
+        return -1;
+    }
     for(int idx = 0;idx<(mat1->cols*mat1->rows);idx++){
         result->data[idx] = mat1->data[idx] + mat2->data[idx];
     }
@@ -146,8 +177,24 @@ int add_matrix(matrix *result, matrix *mat1, matrix *mat2) {
  * Return 0 upon success and a nonzero value upon failure.
  */
 int sub_matrix(matrix *result, matrix *mat1, matrix *mat2) {
-    /* TODO: YOUR CODE HERE */
+    if(mat1->rows!=mat2->rows){
+        return -1;
+    }
+    if(mat1->cols!=mat2->cols){
+        return -1;
+    }
+    if(mat1->rows!=result->rows){
+        return -1;
+    }
+    if(mat1->cols!=result->cols){
+        return -1;
+    }
+    for(int idx = 0;idx<(mat1->cols*mat1->rows);idx++){
+        result->data[idx] = mat1->data[idx] - mat2->data[idx];
+    }
+    return 0;
 }
+
 
 /*
  * Store the result of multiplying mat1 and mat2 to `result`.
@@ -155,7 +202,27 @@ int sub_matrix(matrix *result, matrix *mat1, matrix *mat2) {
  * Remember that matrix multiplication is not the same as multiplying individual elements.
  */
 int mul_matrix(matrix *result, matrix *mat1, matrix *mat2) {
-    /* TODO: YOUR CODE HERE */
+    if(mat1->rows!=mat2->rows){
+        return -1;
+    }
+    if(mat1->cols!=mat2->cols){
+        return -1;
+    }
+    if(mat1->rows!=result->rows){
+        return -1;
+    }
+    if(mat1->cols!=result->cols){
+        return -1;
+    }
+    //mat->data[row*mat->cols+col]，这个写法默认rows临近而cols不临近吧
+    for(int i = 0;i<mat1->rows;i++){
+        for(int j = 0;j<mat1->cols;j++){
+            for(int k = 0;k<mat1->rows;k++){
+                result->data[i*mat1->cols+j] += mat1->data[i*mat1->cols+k] * mat2->data[k*mat1->cols+j];
+            }
+        }
+    }
+    return 0;
 }
 
 /*
@@ -164,7 +231,41 @@ int mul_matrix(matrix *result, matrix *mat1, matrix *mat2) {
  * Remember that pow is defined with matrix multiplication, not element-wise multiplication.
  */
 int pow_matrix(matrix *result, matrix *mat, int pow) {
-    /* TODO: YOUR CODE HERE */
+        int n,res;
+    if(mat->rows!=result->rows){
+        return -1;
+    }
+    if(mat->cols!=result->cols){
+        return -1;
+    }
+    if(mat->rows!=mat->cols){
+        return -1;
+    }
+    n = mat->rows;
+    res = 0;
+    matrix *tmp = NULL;
+    res+= allocate_matrix(&tmp,n,n);
+    if(pow==0){
+        return 0;
+    }
+    // 初始化temp矩阵为输入矩阵
+    for (int i = 0; i < n * n; i++) {
+        tmp->data[i] = mat->data[i];
+    }
+    // 计算矩阵的pow次幂
+    for (int k = 1; k < pow; k++) {
+        // 将temp矩阵与输入矩阵相乘，结果存储在result矩阵中
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                result->data[i * n + j] = 0.0;
+                for (int l = 0; l < n; l++) {
+                    result->data[i * n + j] += tmp->data[i * n + l] * mat->data[l * n + j];
+                }
+            }
+        }
+    }
+    deallocate_matrix(tmp);
+    return res;
 }
 
 /*
@@ -172,7 +273,10 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
  * Return 0 upon success and a nonzero value upon failure.
  */
 int neg_matrix(matrix *result, matrix *mat) {
-    /* TODO: YOUR CODE HERE */
+    for(int idx = 0;idx<(mat->cols*mat->rows);idx++){
+        result->data[idx] = -mat->data[idx];
+    }
+    return 0;
 }
 
 /*
@@ -180,6 +284,9 @@ int neg_matrix(matrix *result, matrix *mat) {
  * Return 0 upon success and a nonzero value upon failure.
  */
 int abs_matrix(matrix *result, matrix *mat) {
-    /* TODO: YOUR CODE HERE */
+    for(int idx = 0;idx<(mat->cols*mat->rows);idx++){
+        result->data[idx] = abs(mat->data[idx]);
+    }
+    return 0;
 }
 
