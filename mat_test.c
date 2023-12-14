@@ -18,21 +18,21 @@ void add_test(void) {
   CU_ASSERT_EQUAL(allocate_matrix(&mat2, 2, 2), 0);
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
-      printf("%lf\n",result->data[i*2+j]);
+      //printf("%lf\n",result->data[i*2+j]);
     }
   }
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
       set(mat1, i, j, i * 2 + j);
       set(mat2, i, j, i * 2 + j);
-      printf("%d = %lf\n", i * 2 + j,mat1->data[i*2+j]);
+      //printf("%d = %lf\n", i * 2 + j,mat1->data[i*2+j]);
     }
   }
   add_matrix(result, mat1, mat2);
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
       CU_ASSERT_EQUAL(get(result, i, j), 2 * (i * 2 + j));
-      printf("%d = %lf\n",2 * (i * 2 + j), get(result, i, j));
+      //printf("%d = %lf\n",2 * (i * 2 + j), get(result, i, j));
     }
   }
   deallocate_matrix(result);
@@ -146,9 +146,13 @@ void pow_test(void) {
   set(mat, 1, 1, 0);
   pow_matrix(result, mat, 3);
   CU_ASSERT_EQUAL(get(result, 0, 0), 3);
+  printf("%d = %lf\n",3,get(result, 0, 0));
   CU_ASSERT_EQUAL(get(result, 0, 1), 2);
+  printf("%d = %lf\n",2,get(result, 0, 1));
   CU_ASSERT_EQUAL(get(result, 1, 0), 2);
+  printf("%d = %lf\n",2,get(result, 1, 0));
   CU_ASSERT_EQUAL(get(result, 1, 1), 1);
+  printf("%d = %lf\n",1,get(result, 1, 1));
   pow_matrix(result, mat, 10);
   CU_ASSERT_EQUAL(get(result, 0, 0), 89);
   CU_ASSERT_EQUAL(get(result, 0, 1), 55);

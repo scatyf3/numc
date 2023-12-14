@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -std=c99 -fopenmp -mavx -mfma -pthread
+CFLAGS = -g -Wall -std=c99 -fopenmp -mavx -mfma -pthread -Wno-redundant-decls
 LDFLAGS = -fopenmp
 CUNIT = -L/usr/lib/x86_64-linux-gnu -I/usr/include/CUnit -lcunit
 PYTHON = -I/workspaces/numc/Python-3.6.15 -lpython3.6m

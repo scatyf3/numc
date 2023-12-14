@@ -121,9 +121,44 @@ int allocate_matrix_ref(matrix **mat, matrix *from, int offset, int rows, int co
  * (including itself). You cannot assume that mat is not NULL.
  */
 void deallocate_matrix(matrix *mat) {
-    free(mat->data);
+    if(mat==NULL){
+        return;
+    }
+    if(mat->ref_cnt==1 && mat->parent==NULL){
+        //`mat` is not a slice and has no existing slices
+        free(mat->data);
+    }
+    else if(mat->ref_cnt==1 && mat->parent->ref_cnt==0){
+        //`mat` is the last existing slice of its parent matrix and its parent matrix has no other references
+        free(mat->data);
+    }
+    else if(mat->parent!=NULL) {
+        mat->parent->ref_cnt--;
+    }
+    //free struct
     free(mat);
 }
+
+/*
+@suggestion from CHATGPT
+void deallocate_matrix(matrix *mat) {
+    if (mat->parent != NULL) {
+        // 若该矩阵不是根矩阵
+        mat->parent->ref_cnt -= 1;
+        if (mat->parent->ref_cnt == 0) {
+            // 若父矩阵没有其他引用
+            deallocate_matrix(mat->parent); // 递归释放父矩阵
+        }
+    }
+
+    if (mat->ref_cnt == 1 && mat->parent == NULL) {
+        // 若该矩阵没有子矩阵且没有其他引用
+        free(mat->data);
+    }
+
+    free(mat);
+}
+*/
 
 /*
  * Returns the double value of the matrix at the given row and column.
@@ -146,7 +181,12 @@ void set(matrix *mat, int row, int col, double val) {
  * Sets all entries in mat to val
  */
 void fill_matrix(matrix *mat, double val) {
-    /* TODO: YOUR CODE HERE */
+    if(mat == NULL){
+        return ;
+    }
+    for(int i = 0;i<mat->rows*mat->cols;i++){
+        mat->data[i]=val;
+    }
 }
 
 /*
@@ -231,41 +271,49 @@ int mul_matrix(matrix *result, matrix *mat1, matrix *mat2) {
  * Remember that pow is defined with matrix multiplication, not element-wise multiplication.
  */
 int pow_matrix(matrix *result, matrix *mat, int pow) {
-        int n,res;
-    if(mat->rows!=result->rows){
+    int n = mat->rows;
+    
+    if (mat->rows != result->rows || mat->cols != result->cols || mat->rows != mat->cols) {
         return -1;
     }
-    if(mat->cols!=result->cols){
-        return -1;
+    
+    // 初始化 result 矩阵为对角线上元素为 1 的矩阵 
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            result->data[i * n + j] = (i == j) ? 1.0 : 0.0;
+        }
     }
-    if(mat->rows!=mat->cols){
-        return -1;
-    }
-    n = mat->rows;
-    res = 0;
-    matrix *tmp = NULL;
-    res+= allocate_matrix(&tmp,n,n);
-    if(pow==0){
+    
+    if (pow == 0) {
         return 0;
     }
-    // 初始化temp矩阵为输入矩阵
-    for (int i = 0; i < n * n; i++) {
-        tmp->data[i] = mat->data[i];
+    
+    matrix *tmp = NULL;
+    int res = allocate_matrix(&tmp, n, n);
+    if (res != 0) {
+        return res;
     }
-    // 计算矩阵的pow次幂
-    for (int k = 1; k < pow; k++) {
-        // 将temp矩阵与输入矩阵相乘，结果存储在result矩阵中
+    
+    // 逐次乘方计算
+    for (int k = 0; k < pow; k++) {
+        // 将 result 矩阵与输入矩阵相乘，结果存储在 tmp 矩阵中
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                result->data[i * n + j] = 0.0;
+                tmp->data[i * n + j] = 0.0;
                 for (int l = 0; l < n; l++) {
-                    result->data[i * n + j] += tmp->data[i * n + l] * mat->data[l * n + j];
+                    tmp->data[i * n + j] += result->data[i * n + l] * mat->data[l * n + j];
                 }
             }
         }
+        
+        // 将 tmp 矩阵的值复制回 result 矩阵
+        for (int i = 0; i < n * n; i++) {
+            result->data[i] = tmp->data[i];
+        }
     }
+    
     deallocate_matrix(tmp);
-    return res;
+    return 0;
 }
 
 /*
